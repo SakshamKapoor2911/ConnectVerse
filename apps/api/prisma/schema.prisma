@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Models for the ConnectVerse social network
+
+model User {
+  id                String      @id @default(uuid())
+  email             String      @unique
+  password          String?     // Nullable for OAuth users
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  profile           Profile?
+  connectionsFrom   Connection[] @relation("UserConnections")
+  connectionsTo     Connection[] @relation("ConnectionUser")
+  skills            Skill[]
+  endorsementsGiven Endorsement[] @relation("EndorserUser")
+  endorsementsReceived Endorsement[] @relation("EndorsedUser")
+}
+
+model Profile {
+  id                String      @id @default(uuid())
+  userId            String      @unique
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName         String
+  lastName          String
+  headline          String?
+  bio               String?
+  location          String?
+  avatarUrl         String?
+  websiteUrl        String?
+  twitterHandle     String?
+  githubHandle      String?
+  linkedinHandle    String?
+  isPublic          Boolean     @default(true)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model Connection {
+  id                String      @id @default(uuid())
+  userId            String
+  user              User        @relation("UserConnections", fields: [userId], references: [id], onDelete: Cascade)
+  connectedToId     String
+  connectedTo       User        @relation("ConnectionUser", fields: [connectedToId], references: [id], onDelete: Cascade)
+  status            ConnectionStatus
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([userId, connectedToId])
+  @@index([userId])
+  @@index([connectedToId])
+}
+
+model Skill {
+  id                String      @id @default(uuid())
+  name              String
+  userId            String
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endorsements      Endorsement[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model Endorsement {
+  id                String      @id @default(uuid())
+  skillId           String
+  skill             Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  endorserId        String
+  endorser          User        @relation("EndorserUser", fields: [endorserId], references: [id], onDelete: Cascade)
+  endorsedId        String
+  endorsed          User        @relation("EndorsedUser", fields: [endorsedId], references: [id], onDelete: Cascade)
+  createdAt         DateTime    @default(now())
+
+  @@unique([skillId, endorserId, endorsedId])
+  @@index([skillId])
+  @@index([endorserId])
+  @@index([endorsedId])
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  BLOCKED
+}

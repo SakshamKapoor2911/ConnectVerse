@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Docker: Postgres",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "problemMatcher": []
+    }
+  ]
+}

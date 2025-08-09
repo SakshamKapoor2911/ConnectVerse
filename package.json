@@ -1,0 +1,24 @@
+{
+  "name": "connectverse",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "npm@10.9.2",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "lint": "npm -w apps/web run lint --if-present && npm -w apps/api run lint --if-present",
+    "typecheck": "npm -w apps/web run typecheck --if-present && npm -w apps/api run typecheck --if-present",
+    "build": "npm -w apps/web run build --if-present && npm -w apps/api run build --if-present",
+    "dev:web": "npm -w apps/web run dev",
+    "dev:api": "npm -w apps/api run start:dev",
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:api\""
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
